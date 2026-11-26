@@ -126,3 +126,18 @@ button:disabled{opacity:.55;cursor:wait}
 .wall-loading span{width:18px;height:18px;border:2px solid var(--muted);border-top-color:var(--paper);border-radius:50%;animation:wall-spin .75s linear infinite}
 @keyframes wall-spin{to{transform:rotate(1turn)}}
 @media(prefers-reduced-motion:reduce){.wall-loading span{animation:none}}
+
+/* Editor on wide screens: saved tickets stay visible on the left, the form is
+   in the middle and the preview follows on the right. Narrower screens keep the
+   stacked layout above. */
+@media(min-width:1000px){
+  .admin-water-page .admin-shell{max-width:1360px}
+  .editor-layout{grid-template-columns:minmax(230px,290px) minmax(0,1fr) minmax(260px,330px);grid-template-areas:"list editor preview";gap:20px}
+  .editor-panel{grid-area:editor}
+  .preview-panel{grid-area:preview;position:sticky;top:20px}
+  .preview-panel .ticket{max-width:none}
+  .list-panel{grid-area:list;grid-column:auto;position:sticky;top:20px;display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
+  .list-panel .editor-heading{flex:none}
+  #ticket-list{flex:1;min-height:0;max-height:none}
+  #back-to-list{display:none}
+}
