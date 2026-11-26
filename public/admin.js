@@ -68,7 +68,7 @@ function updatePreview() {
 function setMessage(text, isError = false) {
   message.textContent = text;
   message.hidden = !text;
-  message.style.borderColor = isError ? '#8b4545' : '#aaa';
+  message.classList.toggle('notice--error', isError);
 }
 
 function reset() {

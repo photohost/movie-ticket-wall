@@ -72,12 +72,14 @@ a{color:inherit}
 .editor-heading h2{margin:0;overflow-wrap:anywhere}
 #editor-title{scroll-margin-top:20px}
 #back-to-list{flex:none}
-.editor-panel label{display:block;margin:14px 0 6px;font-size:13px;font-weight:600}
+.editor-panel label{display:block;margin:0 0 6px;font-size:13px;font-weight:600}
+#ticket-form{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;min-width:0}
 .editor-panel input:not([type=file]),.editor-panel select{width:100%;min-height:42px;padding:8px 11px;border:1px solid #bdbdb9;border-radius:8px;background:#fff;color:#242424}
 .editor-panel input[type=file]{max-width:100%;font-size:12px}
 .editor-panel input:focus-visible,.editor-panel select:focus-visible,.quiet-button:focus-visible,.primary-button:focus-visible,.saved-item:focus-visible{outline:2px solid #333;outline-offset:2px}
 .form-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
+.form-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:10px}
 .quiet-button,.primary-button{min-height:40px;padding:7px 15px;border-radius:999px;border:1px solid #999;background:rgba(255,255,255,.8);color:#222}
 .primary-button{border-color:#222;background:#222;color:#fff}
 .quiet-button:hover{background:#f6f6f4}.primary-button:hover{background:#444}
@@ -127,17 +129,81 @@ button:disabled{opacity:.55;cursor:wait}
 @keyframes wall-spin{to{transform:rotate(1turn)}}
 @media(prefers-reduced-motion:reduce){.wall-loading span{animation:none}}
 
-/* Editor on wide screens: saved tickets stay visible on the left, the form is
-   in the middle and the preview follows on the right. Narrower screens keep the
-   stacked layout above. */
+/* ── 票根編輯室：暗房沖印 ──────────────────────────────────────────
+   Dark panels so the paper-white ticket preview is the one lit object,
+   with a warm safelight accent. Only the editor page is themed; the
+   public wall above is untouched. */
+.admin-water-page{
+  --ed-panel:#1a1b1f;--ed-line:#2b2d33;--ed-field:#0e0f12;--ed-field-line:#3a3c43;
+  --ed-ink:#e8e6e1;--ed-strong:#f2f0ec;--ed-dim:#b9b7b1;--ed-faint:#83838c;--ed-accent:#d9a441;
+  --water-center:#2a2b30;--water-mid:#1a1b1f;--water-edge:#0d0e11;
+  color:var(--ed-ink)
+}
+.admin-water-page .admin-shell{max-width:1360px;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;color:var(--ed-ink)}
+.admin-water-page .site-header{border-bottom-color:var(--ed-line)}
+.admin-water-page .site-header h1{color:var(--ed-strong)}
+.admin-water-page .text-link{color:var(--ed-accent);border-bottom-color:#4a4c54}
+.admin-water-page .text-link:hover{border-bottom-color:var(--ed-accent)}
+.admin-water-page .editor-panel,
+.admin-water-page .list-panel,
+.admin-water-page .preview-panel{padding:20px;border:1px solid var(--ed-line);border-radius:12px;background:var(--ed-panel)}
+.admin-water-page .editor-panel h2,
+.admin-water-page .list-panel h2,
+.admin-water-page .preview-panel h2{color:var(--ed-strong)}
+.admin-water-page .editor-panel label,
+.admin-water-page .list-panel label{color:var(--ed-dim)}
+.admin-water-page .help{color:var(--ed-faint)}
+.admin-water-page .editor-panel input:not([type=file]),
+.admin-water-page .editor-panel select,
+.admin-water-page #ticket-search{border-color:var(--ed-field-line);background:var(--ed-field);color:var(--ed-ink)}
+.admin-water-page .editor-panel input[type=file]{color:var(--ed-dim)}
+.admin-water-page .editor-panel input:focus-visible,
+.admin-water-page .editor-panel select:focus-visible,
+.admin-water-page #ticket-search:focus-visible,
+.admin-water-page .quiet-button:focus-visible,
+.admin-water-page .primary-button:focus-visible,
+.admin-water-page .saved-item:focus-visible{outline-color:var(--ed-accent)}
+.admin-water-page .quiet-button{border-color:#4e5058;background:transparent;color:#ddd}
+.admin-water-page .quiet-button:hover{background:#24262c}
+.admin-water-page .primary-button{border-color:var(--ed-accent);background:var(--ed-accent);color:#141414}
+.admin-water-page .primary-button:hover{border-color:#e8b355;background:#e8b355}
+.admin-water-page .notice{border-color:#43454d;background:#141519;color:var(--ed-ink)}
+.admin-water-page .notice--error{border-color:#c06a6a}
+.admin-water-page .saved-item{padding-left:9px;border-left:3px solid transparent;border-bottom-color:#26282e;color:#cfcdc8}
+.admin-water-page .saved-item:hover{background:#212329}
+.admin-water-page .saved-item[aria-current=true]{border-left-color:var(--ed-accent);background:#232529;box-shadow:none;color:var(--ed-strong)}
+.admin-water-page .saved-item small{color:var(--ed-faint)}
+
+/* Wide screens: three balanced columns that fill the window exactly, so the
+   page itself never scrolls — the list, the form and the preview each scroll
+   inside their own panel. Narrower screens keep the stacked layout above. */
 @media(min-width:1000px){
-  .admin-water-page .admin-shell{max-width:1360px}
-  .editor-layout{grid-template-columns:minmax(230px,290px) minmax(0,1fr) minmax(260px,330px);grid-template-areas:"list editor preview";gap:20px}
-  .editor-panel{grid-area:editor}
-  .preview-panel{grid-area:preview;position:sticky;top:20px}
-  .preview-panel .ticket{max-width:none}
-  .list-panel{grid-area:list;grid-column:auto;position:sticky;top:20px;display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
-  .list-panel .editor-heading{flex:none}
-  #ticket-list{flex:1;min-height:0;max-height:none}
+  .admin-water-page{height:100vh;height:100dvh;overflow:hidden}
+  .admin-water-page .admin-shell{display:flex;flex-direction:column;height:100%;min-height:0;padding-block:26px;overflow:hidden}
+  .admin-water-page .site-header{flex:none}
+  .admin-water-page .editor-layout{
+    flex:1;min-height:0;padding-top:20px;gap:20px;align-items:stretch;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);
+    grid-template-areas:"list editor preview"
+  }
+  .admin-water-page .editor-panel{grid-area:editor}
+  .admin-water-page .preview-panel{grid-area:preview}
+  .admin-water-page .list-panel{grid-area:list;grid-column:auto;scroll-margin-top:0}
+  .admin-water-page .editor-panel,
+  .admin-water-page .list-panel,
+  .admin-water-page .preview-panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .admin-water-page .editor-heading,
+  .admin-water-page .list-panel label,
+  .admin-water-page #ticket-search,
+  .admin-water-page #list-loading{flex:none}
+  .admin-water-page #ticket-list{flex:1;min-height:0;max-height:none;margin-top:6px}
+  .admin-water-page #ticket-form{flex:1;min-height:0;justify-content:space-between;overflow-y:auto;padding-right:4px}
+  /* The fields scroll when the window is short; the two buttons stay put so
+     publishing never hides below the fold. */
+  .admin-water-page .form-actions{position:sticky;bottom:0;margin-top:0;padding-top:14px;border-top:1px solid var(--ed-line);background:var(--ed-panel)}
+  .admin-water-page #preview{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:auto}
+  /* Keep the preview's real 4:4.8 proportions and shrink it instead, so a short
+     window still shows the whole stub. */
+  .admin-water-page .preview-panel .ticket{width:100%;max-width:clamp(160px,calc((100dvh - 390px) / 1.2),300px)}
   #back-to-list{display:none}
 }
