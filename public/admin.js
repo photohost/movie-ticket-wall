@@ -164,6 +164,10 @@ async function reloadList() {
   drawList();
 }
 
+function encode(canvas, type, quality) {
+  return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+}
+
 async function compress(file) {
   if (!file.type.startsWith('image/')) throw new Error('請選擇圖片檔案');
   const bitmap = await createImageBitmap(file).catch(() => { throw new Error('無法讀取圖片，請改用 JPEG、PNG 或 WebP'); });
@@ -173,8 +177,20 @@ async function compress(file) {
   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
   canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', .78));
-  if (!blob || blob.type !== 'image/webp') throw new Error('無法壓縮圖片，請改用其他圖片');
+  let blob = await encode(canvas, 'image/webp', .78);
+  if (!blob || blob.type !== 'image/webp') {
+    // Safari cannot encode WebP from a canvas and hands back a PNG instead.
+    // Fall back to JPEG on a white background so transparent PNGs stay readable.
+    const flat = document.createElement('canvas');
+    flat.width = canvas.width;
+    flat.height = canvas.height;
+    const flatContext = flat.getContext('2d');
+    flatContext.fillStyle = '#fff';
+    flatContext.fillRect(0, 0, flat.width, flat.height);
+    flatContext.drawImage(canvas, 0, 0);
+    blob = await encode(flat, 'image/jpeg', .85);
+    if (!blob || blob.type !== 'image/jpeg') throw new Error('無法壓縮圖片，請改用其他圖片');
+  }
   if (blob.size > 3_000_000) throw new Error('圖片壓縮後仍超過 3 MB，請選擇較小的圖片');
   return blob;
 }
