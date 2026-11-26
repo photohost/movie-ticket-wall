@@ -74,8 +74,7 @@ async function loadPage() {
   try {
     const [page, gsap] = await Promise.all([
       requestPage(next),
-      initial || motion.matches ? null : loadAnimation(),
-      initial ? null : new Promise(resolve => setTimeout(resolve, 1000))
+      initial || motion.matches ? null : loadAnimation()
     ]);
     if (initial) {
       count.textContent = `已收藏 ${page.total} 張票根`;
