@@ -54,6 +54,28 @@ test('media rejects unknown identifiers', async () => {
   assert.equal(response.status, 404);
 });
 
+test('public posters are cached long-term and only served when published', async () => {
+  const env = published => ({
+    DB: { prepare() { return { bind() { return { first: async () => (published ? { 1: 1 } : null) }; } }; } },
+    POSTERS: { get: async () => ({ body: 'poster-bytes', httpMetadata: { contentType: 'image/webp' } }) }
+  });
+  const url = `https://watch.example/media/${ready.poster_key}`;
+  const hit = await worker.fetch(new Request(url), env(true));
+  assert.equal(hit.status, 200);
+  assert.equal(hit.headers.get('Cache-Control'), 'public, max-age=31536000, immutable');
+  assert.equal(hit.headers.get('X-Content-Type-Options'), 'nosniff');
+  assert.equal(await hit.text(), 'poster-bytes');
+  const hidden = await worker.fetch(new Request(url), env(false));
+  assert.equal(hidden.status, 404);
+});
+
+test('poster lookups have an index and migrations match the schema', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const index = 'CREATE INDEX IF NOT EXISTS tickets_poster_key ON tickets (poster_key);';
+  assert.ok((await readFile(new URL('../schema.sql', import.meta.url), 'utf8')).includes(index));
+  assert.ok((await readFile(new URL('../migrations/0002_poster_key_index.sql', import.meta.url), 'utf8')).includes(index));
+});
+
 test('authenticated editor can create, publish and revise a ticket', async t => {
   const { privateKey, publicKey } = await generateKeyPair('RS256');
   const publicJwk = { ...await exportJWK(publicKey), kid: 'local-key', alg: 'RS256', use: 'sig' };

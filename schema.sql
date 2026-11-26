@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS tickets (
 );
 CREATE INDEX IF NOT EXISTS tickets_public_order
   ON tickets (status, watched_on DESC, published_at DESC);
+CREATE INDEX IF NOT EXISTS tickets_poster_key ON tickets (poster_key);

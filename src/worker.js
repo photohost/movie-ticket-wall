@@ -34,7 +34,9 @@ async function servePoster(env, key, admin = false) {
   if (!object) return error('找不到圖片', 404);
   return new Response(object.body, { headers: {
     'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
-    'Cache-Control': admin ? 'no-store' : 'public, max-age=300',
+    // Poster keys are random UUIDs and a replaced image always gets a new key,
+    // so a public poster's bytes never change and can be cached for a year.
+    'Cache-Control': admin ? 'no-store' : 'public, max-age=31536000, immutable',
     'X-Content-Type-Options': 'nosniff'
   } });
 }
